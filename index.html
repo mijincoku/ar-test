@@ -19,13 +19,20 @@
       </a-assets>
       
       <a-marker type='pattern' url='pattern-shiroharaAR.patt'>
-        <a-plane
+        <!-- <a-plane
           position="0 0 0"
           rotation="0 0 0"
           width="4"
           height="4"
           material="src: #front;">
-        </a-plane>
+        </a-plane> -->
+        <a-entity
+              geometry="primitive: plane;"
+              material="shader:gif; src:#front;
+              opacity:1"
+              rotation="-90 0 0">
+         </a-entity>
+
       </a-marker>
       <a-entity camera></a-entity>
     </a-scene>
