@@ -1,81 +1,71 @@
-<!DOCTYPE html>
 
-<html>
+<!-- <!DOCTYPE html> -->
+ <html>
+  <script src="https://aframe.io/releases/1.0.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="https://rawgit.com/mayognaise/aframe-gif-shader/master/dist/aframe-gif-shader.min.js"></script>
+  <script src="shader-grid-glitch.js"></script>
 
-<head>
+  <body style="margin : 0px; overflow: hidden;">
 
-<meta charset="utf-8">
+    <div class="arjs-loader">
+      <div>Loading, please wait...</div>
+    </div>
+    <a-scene embedded vr-mode-ui="enabled:false;" arjs="debugUIEnabled:true; detectionMode: mono_and_matrix; matrixCodeType: 3x3; patternRatio:0.6">
 
-<!-- A-Frame ライブラリの読み込み※GIFはV0.9.0で動く -->
+      <!-- <a-assets>
+        <img id="front" src="hyoshiki.png" />
+      </a-assets> -->
+      
+      <a-assets>
 
-  <script src='https://aframe.io/releases/0.9.0/aframe.min.js'></script>
-
-<!-- AR.js ライブラリの読み込み -->
-
-<script src='https://raw.githack.com/jeromeetienne/AR.js/2.0.8/aframe/build/aframe-ar.js'></script>
-
-<!-- shaderライブラリ -->
-
-<script src="https://rawgit.com/mayognaise/aframe-gif-shader/master/dist/aframe-gif-shader.min.js"></script>
-
-<script src="shader-grid-glitch.js"></script>
+        <img id="cuina" src="ARgif.gif">
+     </a-assets>
 
 
+      <a-marker type='pattern' url='pattern-shiroharaAR.patt'>
+        <a-entity
 
-<link rel="stylesheet" href="style.css">
+        geometry="primitive: plane;"
 
-<title>くいなAR</title>
+        material="shader:gif; src:#cuina;
 
-</head>
+        color:white;
 
-  
+        opacity:1"
 
-<body>
-
-  <div class="arjs-loader">
-
-    <p>gifアニメテスト00</p>
-
-  </div>
-
- 
-
-<!-- デバッグ用の画面表示、VR用のボタンをそれぞれ非表示に -->
-
-<a-scene embedded arjs="debugUIEnabled:false;" vr-mode-ui="enabled: false">
-
-        <!-- Assetの用意　 -->
-
-        <a-assets>
-
-            <img id="cuina" src="ARgif.gif">
-
-        </a-assets>
+        rotation="-90 0 0">
+        </a-entity>
+        <!-- <a-plane
+          position="0 1 0"
+          rotation="0 0 0"
+          width="4"
+          height="4"
+          material="src: #front;">
+        </a-plane> -->
+      </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body>
+  </html> 
 
 
 
-<!-- 『.patt』ファイルを読み込む -->
+<!-- イーハトーヴォの巻 -->
+  <!-- <body style="margin: 0px; overflow: hidden;">
+    <a-scene embedded arjs>
+      <a-marker type="pattern" url="pattern-shiroharaAR.patt">
+        <a-box position="0 -1 0" scale="1 1 1" color="grey"></a-box>
+        <a-text
+        value="イーハトーヴォ"
+        font="F66ElleminBpetit-msdf.json"
+        font-image="F66ElleminBpetit-msdf.png"
+        negate="false"
+        scale="2 2 1"
+        position="0 1 -4"
+        color="black"></a-text>
 
-　<a-marker preset="custom" type="pattern" url="pattern-shiroharaAR.patt" >
-
-   <a-entity
-
-              geometry="primitive: plane;"
-
-              material="shader:gif; src:#kaeru;
-
-              color:white;
-
-              opacity:1"
-
-              rotation="-90 0 0">
-
-   </a-entity>
-
-</a-marker>
-
-    <a-entity camera></a-entity>
-
-  </a-scene>
-
-  <script>
+      </a-marker>
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body> -->
