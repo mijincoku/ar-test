@@ -17,6 +17,10 @@
       </a-assets>
       
       <a-marker type='pattern' url='pattern-shiroharaAR.patt'>
+        <a-entity 
+        geometry="primitive:box;" 
+        material="shader:gif;src:#front ;color:green ;opacity:1">
+       </a-entity>
         <!-- <a-plane
           position="0 0 0"
           rotation="0 0 0"
@@ -24,12 +28,6 @@
           height="1"
           material="shader:gif; src:ARgif.gif; opacity:1">
         </a-plane> -->
-
-        <a-entity
-              geometry="primitive:plane;"
-              material="shader:gif; src:ARgif.gif; opacity:1"
-              rotation="-90 0 0">
-            </a-entity>
 
       </a-marker>
       <a-entity camera></a-entity>
