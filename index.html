@@ -3,7 +3,7 @@
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://rawgit.com/mayognaise/aframe-gif-shader/master/dist/aframe-gif-shader.min.js"></script>
+    <script src="node_modules/aframe-gif-component"></script>
   </head>
 
   <body style="margin : 0px; overflow: hidden;">
@@ -13,7 +13,7 @@
 
         <a-entity 
         geometry="primitive: plane;"
-        material="shader:gif; src:url(ARgifsmall.gif); color: white; opacity: 1"
+        gif="url: ARgifsmall.gif;"
         scale="5 5 5"
         rotation="0 0 0"
         position="0 0 -3">
@@ -24,6 +24,4 @@
     </a-scene>
   </body>
 </html>
-
-
 
