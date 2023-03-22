@@ -4,7 +4,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
     <!-- <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script> -->
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://rawgit.com/mayognaise/aframe-gif-shader/master/dist/aframe-gif-shader.min.js"></script>
+    <script>
+      AFRAME.registerComponent('gif-loader', {
+        schema: {
+          src: { type: 'string' }
+        },
+    
+        init: function () {
+          const { src } = this.data;
+          const loader = new THREE.TextureLoader();
+          const img = document.createElement('img');
+          const texture = new THREE.Texture(img);
+    
+          loader.setCrossOrigin('anonymous');
+          loader.load(src, function () {
+            img.src = src;
+            texture.needsUpdate = true;
+          });
+    
+          img.onload = function () {
+            texture.image = img;
+            texture.needsUpdate = true;
+          };
+    
+          this.el.setAttribute('material', 'map', texture);
+        }
+      });
+    </script>
+    
   </head>
 
   <body style="margin : 0px; overflow: hidden;">
@@ -14,10 +41,13 @@
 
         <a-entity 
         geometry="primitive: plane;"
-        material="shader:gif; src:ARgifsmall.gif; color: white; opacity: 1"
+        gif-loader="src: ARgifsmall.gif"
+        material="color: white; opacity: 1"
         scale="5 5 5"
         rotation="0 0 0"
         position="0 0 -3">
+      </a-entity>
+
       </a-entity>
       </a-marker>
 
