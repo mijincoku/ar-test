@@ -12,6 +12,8 @@
     
         init: function () {
           const { src } = this.data;
+          if (!src) return;
+    
           const loader = new THREE.TextureLoader();
           const img = document.createElement('img');
           const texture = new THREE.Texture(img);
@@ -31,6 +33,7 @@
         }
       });
     </script>
+    
     
   </head>
 
