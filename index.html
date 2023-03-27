@@ -10,20 +10,14 @@
     <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; patternRatio:0.6;'>
 
       <a-assets>
-        <img id="ARgif" src="AR2gif.gif" />
+        <img id="localGif" src="ARgif2.gif" /> <!-- ローカルのGIFファイルをアセットとして追加 -->
       </a-assets>
 
       <a-marker type='pattern' url='pattern-shiroharaAR.patt'>
-        <!-- <a-entity 
-          geometry="primitive: plane;"
-          material="src: url(busstop.png); color: white; opacity: 1"
-          scale="6 9 10"
-          position="0 1 -3">
-        </a-entity> -->
 
         <a-entity 
         geometry="primitive: plane;"
-        material="shader:gif;src:url(ARgif2.gif)"
+        material="shader:gif;src:#localGif"
         scale="3 3 3"
         rotation="0 0 0"
         position="0 0 -3">
@@ -34,3 +28,4 @@
     </a-scene>
   </body>
 </html>
+
