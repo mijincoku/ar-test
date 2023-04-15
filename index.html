@@ -34,17 +34,27 @@
         }
       }
 
-      function initAR() {
-        navigator.geolocation.getCurrentPosition((position) => {
-          const { latitude, longitude } = position.coords;
-          const imageSrc = getImageBasedOnLocation(latitude, longitude);
+      function updateMessage(message) {
+        document.getElementById('message').innerText = message;
+      }
 
-          if (imageSrc) {
-            document.querySelector('#ar-image').setAttribute('src', imageSrc);
-          } else {
-            alert('ARマーカーが認識範囲外です。指定された座標の近くに移動してください。');
-          }
-        });
+      async function initAR() {
+        try {
+          await navigator.permissions.query({ name: 'geolocation' });
+          navigator.geolocation.watchPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const imageSrc = getImageBasedOnLocation(latitude, longitude);
+
+            if (imageSrc) {
+              document.querySelector('#ar-image').setAttribute('src', imageSrc);
+              updateMessage('指定された座標の範囲内です');
+            } else {
+              updateMessage('ARマーカーが認識範囲外です。指定された座標の近くに移動してください。');
+            }
+          });
+        } catch (error) {
+          alert('位置情報のアクセスが許可されていません。設定を確認してください。');
+        }
       }
     </script>
   </head>
@@ -54,5 +64,6 @@
         <a-image id="ar-image" position="0 0 0" scale="1 1 1"></a-image>
       </a-marker>
     </a-scene>
+    <div id="message" style="position: fixed; top: 10px; left: 10px; z-index: 100; color: white; background-color: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 5px;"></div>
   </body>
 </html>
