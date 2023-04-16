@@ -19,35 +19,29 @@
         return deg * (Math.PI / 180);
       }
 
-      function getImageBasedOnLocation(latitude, longitude) {
-        const locationA = { lat: 24.34031322856674, lng: 124.15835542423535 };
-        const locationB = { lat: 24.337916686319687, lng: 124.16563584582616 };
+      function getLocationInfo(latitude, longitude) {
+        const locationA = { lat: 24.34031322856674, lng: 124.15835542423535, id: 'A' };
+        const locationB = { lat: 24.337916686319687, lng: 124.16563584582616, id: 'B' };
         const distanceA = getDistance(latitude, longitude, locationA.lat, locationA.lng);
         const distanceB = getDistance(latitude, longitude, locationB.lat, locationB.lng);
 
         if (distanceA <= 10) {
-          return { image: 'imagea.png', type: 'inside' };
+          return { image: 'imagea.png', type: 'inside', location: locationA };
         } else if (distanceB <= 10) {
-          return { image: 'imageb.png', type: 'inside' };
+          return { image: 'imageb.png', type: 'inside', location: locationB };
         } else {
-          return { image: null, type: 'outside' };
+          const nearestLocation = distanceA < distanceB ? locationA : locationB;
+          const nearestDistance = distanceA < distanceB ? distanceA : distanceB;
+          return { image: null, type: 'outside', location: nearestLocation, distance: nearestDistance };
         }
       }
 
-      function updateMessage(message) {
-        document.getElementById('message').innerText = message;
-      }
-
-      function updateDirectionArrow(locationType) {
-        const arrow = document.querySelector('#direction-arrow');
-        const circle = document.querySelector('#inside-circle');
-
-        if (locationType === 'inside') {
-          arrow.setAttribute('visible', false);
-          circle.setAttribute('visible', true);
+      function updateMessage(type, distance) {
+        const messageElement = document.getElementById('message');
+        if (type === 'inside') {
+          messageElement.innerHTML = '<span style="color:green;">●</span>';
         } else {
-          arrow.setAttribute('visible', true);
-          circle.setAttribute('visible', false);
+          messageElement.innerHTML = `<span style="color:blue;">➡️</span> ${distance.toFixed(2)}m`;
         }
       }
 
@@ -56,31 +50,26 @@
           await navigator.permissions.query({ name: 'geolocation' });
           navigator.geolocation.watchPosition((position) => {
             const { latitude, longitude } = position.coords;
-            const { image, type } = getImageBasedOnLocation(latitude, longitude);
+            const { image, type, location, distance } = getLocationInfo(latitude, longitude);
 
             if (image) {
               document.querySelector('#ar-image').setAttribute('src', image);
-              updateMessage('指定された座標の範囲内です');
-            } else {
-              updateMessage('ARマーカーが認識範囲外です。指定された座標の近くに移動してください。');
             }
-            updateDirectionArrow(type);
+            updateMessage(type, distance);
           });
         } catch (error) {
-         
           alert('位置情報のアクセスが許可されていません。設定を確認してください。');
         }
       }
     </script>
   </head>
   <body style="margin: 0; overflow: hidden;" onload="initAR()">
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      <a-marker type="pattern" url="pattern-shiroharaAR.patt">
-        <a-image id="ar-image" position="0 0 0" scale="1 1 1"></a-image>
-        <a-entity id="direction-arrow" position="0 -1 0" scale="0.5 0.5 0.5" geometry="primitive: cone; radiusBottom: 0.1; radiusTop: 0; height: 0.5" material="color: blue" visible="false"></a-entity>
-        <a-entity id="inside-circle" position="0 -1 0" scale="0.5 0.5 0.5" geometry="primitive: sphere; radius: 0.1" material="color: green" visible="false"></a-entity>
-      </a-marker>
-    </a-scene>
-    <div id="message" style="position: fixed; top: 10px; left: 10px; z-index: 100; color: white; background-color: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 5px;"></div>
-  </body>
+    <a-scene embedded arjs="sourceType: webcam; debug
+    UIEnabled: false;">
+    <a-marker type="pattern" url="pattern-shiroharaAR.patt">
+      <a-image id="ar-image" position="0 0 0" scale="1 1 1"></a-image>
+    </a-marker>
+  </a-scene>
+  <div id="message" style="position: fixed; top: 10px; right: 10px; z-index: 100; color: white; background-color: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 5px;"></div>
+</body>
 </html>
