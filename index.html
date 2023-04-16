@@ -1,88 +1,75 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script>
-      function getDistanceInMeters(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // Earth's radius in meters
-        const lat1_rad = lat1 * (Math.PI / 180);
-        const lat2_rad = lat2 * (Math.PI / 180);
-        const delta_lat = (lat2 - lat1) * (Math.PI / 180);
-        const delta_lon = (lon2 - lon1) * (Math.PI / 180);
-
-        const a = Math.sin(delta_lat / 2) * Math.sin(delta_lat / 2) +
-                  Math.cos(lat1_rad) * Math.cos(lat2_rad) *
-                  Math.sin(delta_lon / 2) * Math.sin(delta_lon / 2);
+      function getDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371;
+        const dLat = deg2rad(lat2 - lat1);
+        const dLng = deg2rad(lng2 - lng1);
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c;
+        return R * c * 1000;
       }
 
-      function getBearing(lat1, lon1, lat2, lon2) {
-        const lat1_rad = lat1 * (Math.PI / 180);
-        const lat2_rad = lat2 * (Math.PI / 180);
-        const delta_lon = (lon2 - lon1) * (Math.PI / 180);
-
-        const y = Math.sin(delta_lon) * Math.cos(lat2_rad);
-        const x = Math.cos(lat1_rad) * Math.sin(lat2_rad) -
-                  Math.sin(lat1_rad) * Math.cos(lat2_rad) * Math.cos(delta_lon);
-        const bearing_rad = Math.atan2(y, x);
-
-        return (bearing_rad * (180 / Math.PI) + 360) % 360;
+      function deg2rad(deg) {
+        return deg * (Math.PI / 180);
       }
 
-      function updateLocation(position) {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
+      function getLocationInfo(latitude, longitude) {
+        const locationA = { lat: 24.34031322856674, lng: 124.15835542423535, id: 'A' };
+        const locationB = { lat: 24.337916686319687, lng: 124.16563584582616, id: 'B' };
+        const distanceA = getDistance(latitude, longitude, locationA.lat, locationA.lng);
+        const distanceB = getDistance(latitude, longitude, locationB.lat, locationB.lng);
 
-        const pointA = { lat: 24.340351689541293, lon: 124.15827467467909 };
-        const distance = getDistanceInMeters(lat, lon, pointA.lat, pointA.lon);
-        const bearing = getBearing(lat, lon, pointA.lat, pointA.lon);
-
-        document.getElementById("distanceEntity").setAttribute("value", `Distance: ${distance.toFixed(2)} m`);
-        document.getElementById("bearingEntity").setAttribute("value", `Bearing: ${bearing.toFixed(2)}°`);
-
-        if (distance <= 10) {
-          document.getElementById("imageEntity").setAttribute("visible", "true");
-          document.getElementById("textEntity").setAttribute("visible", "false");
+        if (distanceA <= 10) {
+          return { image: 'imagea.png', type: 'inside', location: locationA };
+        } else if (distanceB <= 10) {
+          return { image: 'imageb.png', type: 'inside', location: locationB };
         } else {
-          document.getElementById("imageEntity").setAttribute("visible", "false");
-          document.getElementById("textEntity").setAttribute("visible", "true");
+          const nearestLocation = distanceA < distanceB ? locationA : locationB;
+          const nearestDistance = distanceA < distanceB ? distanceA : distanceB;
+          return { image: null, type: 'outside', location: nearestLocation, distance: nearestDistance };
         }
       }
 
-      function watchLocation() {
-        if (navigator.geolocation) {
-          navigator.geolocation.watchPosition(updateLocation);
+      function updateMessage(type, distance) {
+        const messageElement = document.getElementById('message');
+        if (type === 'inside') {
+          messageElement.innerHTML = '<span style="color:green;">●</span>';
         } else {
-          alert("Geolocation is not supported by this browser.");
+          messageElement.innerHTML = `<span style="color:blue;">➡️</span> ${distance.toFixed(2)}m`;
+        }
+      }
+
+      async function initAR() {
+        try {
+          await navigator.permissions.query({ name: 'geolocation' });
+          navigator.geolocation.watchPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const { image, type, location, distance } = getLocationInfo(latitude, longitude);
+
+            if (image) {
+              document.querySelector('#ar-image').setAttribute('src', image);
+            }
+            updateMessage(type, distance);
+          });
+        } catch (error) {
+          alert('位置情報のアクセスが許可されていません。設定を確認してください。');
         }
       }
     </script>
   </head>
-  
-<body style="margin : 0px; overflow: hidden;" onload="watchLocation();">
-<a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; patternRatio:0.6;'>
-
-  <a-marker type='pattern' url='pattern-shiroharaAR.patt'>
-
-    <a-entity id="imageEntity"
-    geometry="primitive: plane;"
-    material="src: url(imageb.png); color: white; opacity: 1"
-    scale="1 1 1"
-    rotation="0 0 0"
-    position="0 0 0"
-    visible="false">
-  </a-entity>
-  
-  <a-text id="textEntity" value="There is nothing" position="-1.25 0.5 -2" visible="false" color="#000"></a-text>
-  <a-text id="distanceEntity" position="-1.25 0.25 -2" visible="true" color="#000"></a-text>
-  <a-text id="bearingEntity" position="-1.25 0 -2" visible="true" color="#000"></a-text>
-  
-  </a-marker>
-
-  <a-entity camera></a-entity>
-</a-scene>
+  <body style="margin: 0; overflow: hidden;" onload="initAR()">
+    <a-scene embedded arjs="sourceType: webcam; debug
+    UIEnabled: false;">
+    <a-marker type="pattern" url="pattern-shiroharaAR.patt">
+      <a-image id="ar-image" position="0 0 0" scale="1 1 1"></a-image>
+    </a-marker>
+  </a-scene>
+  <div id="message" style="position: fixed; top: 10px; right: 10px; z-index: 100; color: white; background-color: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 5px;"></div>
 </body>
 </html>
