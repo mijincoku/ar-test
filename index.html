@@ -1,74 +1,87 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <head>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; }
-    </style>
-</head>
-<body>
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-        <a-assets>
-            <a-asset-item id="arrow-obj" src="daiya.obj"></a-asset-item>
-            <a-asset-item id="arrow-mtl" src="daiya.mtl"></a-asset-item>
-        </a-assets>
-        <a-marker-camera preset="custom" type="pattern" url="pattern-shiroharaAR.patt"></a-marker-camera>
-        <a-entity id="arrow" obj-model="obj: #arrow-obj; mtl: #arrow-mtl" position="0 0.5 0" scale="0.1 0.1 0.1"></a-entity>
-    </a-scene>
-    
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-gps-entity-place.min.js"></script>
     <script>
-        const arrow = document.querySelector('#arrow');
-        const destination = { lat: 24.341380974874625, lon: 124.15850303220783 };
-        
-        function getCompassHeading(alpha, beta, gamma) {
-            const degtorad = Math.PI / 180;
-            const _x = beta ? beta * degtorad : 0;
-            const _y = gamma ? gamma * degtorad : 0;
-            const _z = alpha ? alpha * degtorad : 0;
-            
-            const cX = Math.cos(_x);
-            const cY = Math.cos(_y);
-            const cZ = Math.cos(_z);
-            const sX = Math.sin(_x);
-            const sY = Math.sin(_y);
-            const sZ = Math.sin(_z);
+      function getDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371;
+        const dLat = deg2rad(lat2 - lat1);
+        const dLng = deg2rad(lng2 - lng1);
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c * 1000;
+      }
 
-            const Vx = -cZ * sY - sZ * sX * cY;
-            const Vy = -sZ * sY + cZ * sX * cY;
-            
-            const compassHeading = Math.atan(Vx / Vy);
+      function deg2rad(deg) {
+        return deg * (Math.PI / 180);
+      }
 
-            if (Vy < 0) {
-                return compassHeading + Math.PI;
-            } else if (Vy > 0 && Vx < 0) {
-                return compassHeading + Math.PI * 2;
-            } else {
-                return compassHeading;
-            }
+      function getImageBasedOnLocation(latitude, longitude) {
+        const locationA = { lat: 24.34031322856674, lng: 124.15835542423535 };
+        const locationB = { lat: 24.337916686319687, lng: 124.16563584582616 };
+        const distanceA = getDistance(latitude, longitude, locationA.lat, locationA.lng);
+        const distanceB = getDistance(latitude, longitude, locationB.lat, locationB.lng);
+
+        if (distanceA <= 10) {
+          return { image: 'imagea.png', type: 'locationA' };
+        } else if (distanceB <= 10) {
+          return { image: 'imageb.png', type: 'locationB' };
+        } else {
+          return { image: null, type: 'outside' };
         }
+      }
 
-        function updateArrowDirection() {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const currentLatitude = position.coords.latitude;
-                const currentLongitude = position.coords.longitude;
-                const dLon = destination.lon - currentLongitude;
-
-                const y = Math.sin(dLon) * Math.cos(destination.lat);
-                const x = Math.cos(currentLatitude) * Math.sin(destination.lat) - Math.sin(currentLatitude) * Math.cos(destination.lat) * Math.cos(dLon);
-
-                const bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-                arrow.setAttribute('rotation', { x: 0, y: -bearing, z: 0 });
-            });
+      function updateARImage(image) {
+        if (image) {
+          document.querySelector('#ar-image').setAttribute('src', image);
         }
-        window.addEventListener('deviceorientationabsolute', (event) => {
-            const compassHeading = getCompassHeading(event.alpha, event.beta, event.gamma);
-            arrow.setAttribute('rotation', { x: 0, y: -(compassHeading), z: 0 });
-        });
+      }
 
-        setInterval(updateArrowDirection, 1000);
+      function updateUI(type) {
+        const circle = document.querySelector('#inside-circle');
+        const imagec = document.querySelector('#imagec');
+        const locationA = { lat: 24.34031322856674, lng: 124.15835542423535 };
+        const locationB = { lat: 24.337916686319687, lng: 124.16563584582616 };
+
+        if (type === 'locationA' || type === 'locationB') {
+          circle.setAttribute('visible', true);
+          imagec.setAttribute('visible', false);
+        } else {
+          circle.setAttribute('visible', false);
+          imagec.setAttribute('gps-entity-place', `latitude: ${locationA.lat}; longitude: ${locationA.lng};`);
+          imagec.setAttribute('visible', true);
+        }
+      }
+
+      async function initAR() {
+        try {
+          await navigator.permissions.query({ name: 'geolocation' });
+          navigator.geolocation.watchPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const { image, type } = getImageBasedOnLocation(latitude, longitude);
+            updateARImage(image);
+            updateUI(type);
+          });
+        } catch (error) {
+          alert('位置情報のアクセスが許可されていません。設定を確認してください。');
+        }
+      }
     </script>
-</body>
+  </head>
+  <body style="margin: 0; overflow: hidden;" onload="initAR()">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      <a-marker type="pattern" url="pattern-shiroharaAR.patt">
+        <a-image id="ar-image" position="0 0 0" scale="1 1 1"></a-image>
+      </a-marker>
+      <a-entity id="inside-circle" position="0 -1 0" scale="0.5 0.5 0.5" geometry="primitive: sphere; radius: 0.1" material="color: green" visible="false"></a-entity>
+      <a-entity id="imagec" scale="10 10 10" visible="false">
+        <a-image src="imagec.png" position="0 0 0"></a-image>
+      </a-entity>
+    </a-scene>
+  </body>
 </html>
+
