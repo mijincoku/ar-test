@@ -45,31 +45,34 @@
         }
       }
 
-      async function initAR() {
+      async function updateLocation() {
         try {
-          await navigator.permissions.query({ name: 'geolocation' });
-          navigator.geolocation.watchPosition((position) => {
-            const { latitude, longitude } = position.coords;
-            const { image, type, location, distance } = getLocationInfo(latitude, longitude);
+          const position = await new Promise((resolve, reject) =>
+            navigator.geolocation.getCurrentPosition(resolve, reject)
+          );
+          const { latitude, longitude } = position.coords;
+          const { image, type, location, distance } = getLocationInfo(latitude, longitude);
 
-            if (image) {
-              document.querySelector('#ar-image').setAttribute('src', image);
-            }
-            updateMessage(type, distance);
-          });
+          if (image) {
+            document.querySelector('#ar-image').setAttribute('src', image);
+          }
+          updateMessage(type, distance);
         } catch (error) {
           alert('位置情報のアクセスが許可されていません。設定を確認してください。');
         }
       }
+
+      function initAR() {
+        setInterval(updateLocation, 5000);
+      }
     </script>
   </head>
   <body style="margin: 0; overflow: hidden;" onload="initAR()">
-    <a-scene embedded arjs="sourceType: webcam; debug
-    UIEnabled: false;">
-    <a-marker type="pattern" url="pattern-shiroharaAR.patt">
-      <a-image id="ar-image" position="0 0 0" scale="1 1 1"></a-image>
-    </a-marker>
-  </a-scene>
-  <div id="message" style="position: fixed; top: 10px; right: 10px; z-index: 100; color: white; background-color: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 5px;"></div>
-</body>
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      <a-marker type="pattern" url="pattern-shiroharaAR.patt">
+        <a-image id="ar-image" position="0 0 0" scale="1 1 1"></a-image>
+      </a-marker>
+    </a-scene>
+    <div id="message" style="position: fixed; top: 10px; right: 10px; z-index: 100; color: white; background-color: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 5px;"></div>
+  </body>
 </html>
