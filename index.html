@@ -3,22 +3,65 @@
   <head>
     <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script>
+      function getDistanceInMeters(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // Earth's radius in meters
+        const lat1_rad = lat1 * (Math.PI / 180);
+        const lat2_rad = lat2 * (Math.PI / 180);
+        const delta_lat = (lat2 - lat1) * (Math.PI / 180);
+        const delta_lon = (lon2 - lon1) * (Math.PI / 180);
+
+        const a = Math.sin(delta_lat / 2) * Math.sin(delta_lat / 2) +
+                  Math.cos(lat1_rad) * Math.cos(lat2_rad) *
+                  Math.sin(delta_lon / 2) * Math.sin(delta_lon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+      }
+
+      function updateLocation(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        const pointA = { lat: 24.340351689541293, lon: 124.15827467467909 };
+        const distance = getDistanceInMeters(lat, lon, pointA.lat, pointA.lon);
+
+        if (distance <= 10) {
+          document.getElementById("imageEntity").setAttribute("visible", "true");
+          document.getElementById("textEntity").setAttribute("visible", "false");
+        } else {
+          document.getElementById("imageEntity").setAttribute("visible", "false");
+          document.getElementById("textEntity").setAttribute("visible", "true");
+        }
+      }
+
+      function watchLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.watchPosition(updateLocation);
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+      }
+    </script>
   </head>
 
-  <body style="margin : 0px; overflow: hidden;">
+  <body style="margin : 0px; overflow: hidden;" onload="watchLocation();">
     <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; patternRatio:0.6;'>
 
       <a-marker type='pattern' url='pattern-shiroharaAR.patt'>
 
-        <a-entity 
+        <a-entity id="imageEntity"
         geometry="primitive: plane;"
         material="src: url(imageb.png); color: white; opacity: 1"
         scale="1 1 1"
         rotation="0 0 0"
-        position="0 0 0">
+        position="0 0 0"
+        visible="false">
       </a-entity>
-
-       </a-marker>
+      
+      <a-text id="textEntity" value="There is nothing" position="-1.25 0.5 -2" visible="false" color="#000"></a-text>
+      
+      </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
