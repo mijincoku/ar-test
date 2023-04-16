@@ -40,18 +40,15 @@
         const distance = getDistanceInMeters(lat, lon, pointA.lat, pointA.lon);
         const bearing = getBearing(lat, lon, pointA.lat, pointA.lon);
 
+        document.getElementById("distanceEntity").setAttribute("value", `Distance: ${distance.toFixed(2)} m`);
+        document.getElementById("bearingEntity").setAttribute("value", `Bearing: ${bearing.toFixed(2)}°`);
+
         if (distance <= 10) {
           document.getElementById("imageEntity").setAttribute("visible", "true");
           document.getElementById("textEntity").setAttribute("visible", "false");
-          document.getElementById("distanceEntity").setAttribute("visible", "false");
-          document.getElementById("bearingEntity").setAttribute("visible", "false");
         } else {
           document.getElementById("imageEntity").setAttribute("visible", "false");
           document.getElementById("textEntity").setAttribute("visible", "true");
-          document.getElementById("distanceEntity").setAttribute("visible", "true");
-          document.getElementById("distanceEntity").setAttribute("value", `Distance: ${distance.toFixed(2)} m`);
-          document.getElementById("bearingEntity").setAttribute("visible", "true");
-          document.getElementById("bearingEntity").setAttribute("value", `Bearing: ${bearing.toFixed(2)}°`);
         }
       }
 
@@ -66,26 +63,32 @@
   </head>
 
   <body style="margin : 0px; overflow: hidden;" onload="watchLocation();">
-    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; patternRatio:0.6;'>
+    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detection
+  }
+</script>
+</head>
 
-      <a-marker type='pattern' url='pattern-shiroharaAR.patt'>
+<body style="margin : 0px; overflow: hidden;" onload="watchLocation();">
+<a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; patternRatio:0.6;'>
 
-        <a-entity id="imageEntity"
-        geometry="primitive: plane;"
-        material="src: url(imageb.png); color: white; opacity: 1"
-        scale="1 1 1"
-        rotation="0 0 0"
-        position="0 0 0"
-        visible="false">
-      </a-entity>
-      
-      <a-text id="textEntity" value="There is nothing" position="-1.25 0.5 -2" visible="false" color="#000"></a-text>
-      <a-text id="distanceEntity" position="-1.25 0.25 -2" visible="false" color="#000"></a-text>
-      <a-text id="bearingEntity" position="-1.25 0 -2" visible="false" color="#000"></a-text>
-      
-      </a-marker>
+  <a-marker type='pattern' url='pattern-shiroharaAR.patt'>
 
-      <a-entity camera></a-entity>
-    </a-scene>
-  </body>
+    <a-entity id="imageEntity"
+    geometry="primitive: plane;"
+    material="src: url(imageb.png); color: white; opacity: 1"
+    scale="1 1 1"
+    rotation="0 0 0"
+    position="0 0 0"
+    visible="false">
+  </a-entity>
+  
+  <a-text id="textEntity" value="There is nothing" position="-1.25 0.5 -2" visible="false" color="#000"></a-text>
+  <a-text id="distanceEntity" position="-1.25 0.25 -2" visible="true" color="#000"></a-text>
+  <a-text id="bearingEntity" position="-1.25 0 -2" visible="true" color="#000"></a-text>
+  
+  </a-marker>
+
+  <a-entity camera></a-entity>
+</a-scene>
+</body>
 </html>
